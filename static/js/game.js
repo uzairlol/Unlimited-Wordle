@@ -74,7 +74,7 @@ class WordleGame {
                 tileContainer.className = 'tile-container relative aspect-square';
 
                 const tile = document.createElement('div');
-                tile.className = 'tile w-full h-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center text-3xl font-bold uppercase select-none transition-all duration-200 tile-flip dark:text-gray-100 text-black';
+                tile.className = 'tile w-full h-full border-2 border-[rgb(211,214,218)] dark:border-[#3a3a3c] flex items-center justify-center text-3xl font-bold uppercase select-none transition-all duration-200 tile-flip dark:text-[#f8f8f8] text-black';
                 tile.id = `tile-${r}-${c}`;
 
                 tileContainer.appendChild(tile);
@@ -120,8 +120,8 @@ class WordleGame {
         const btn = document.createElement('button');
         btn.textContent = display;
         btn.setAttribute('data-key', key);
-        // Initially light gray bg, dark text. Dark mode: dark gray bg, light text.
-        btn.className = `key flex flex-1 items-center justify-center rounded m-0.5 font-bold cursor-pointer select-none h-14 bg-gray-200 text-black dark:bg-gray-600 dark:text-gray-100 active:bg-gray-400 dark:active:bg-gray-500 transition-colors text-sm sm:text-base ${isSpecial ? 'flex-[1.5]' : ''}`;
+        // Initial Key State: Light Gray (L) / Darker Gray (D)
+        btn.className = `key flex flex-1 items-center justify-center rounded m-0.5 font-bold cursor-pointer select-none h-14 bg-gray-200 text-black dark:bg-[#818384] dark:text-white active:bg-gray-400 dark:active:bg-gray-600 transition-colors text-sm sm:text-base ${isSpecial ? 'flex-[1.5]' : ''}`;
 
         btn.addEventListener('click', (e) => {
             e.target.blur(); // Remove focus
