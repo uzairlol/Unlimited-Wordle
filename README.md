@@ -1,61 +1,64 @@
-# Unlimited Wordle 🟩🟨⬜
+# Unlimited Wordle
 
-An enhanced, unlimited version of the classic Wordle game. Play as many times as you want, track your stats, and enjoy a polished, mobile-first experience.
+A production-ready, unlimited version of the Wordle word guessing game. This application is built as a Progressive Web App (PWA) using Python (Flask) for the backend and Vanilla JavaScript for a high-performance frontend.
 
-![Wordle Preview](https://raw.githubusercontent.com/kinkelin/WordleCompetition/main/data/official/wordle_logo_192x192.png) 
-*(Replace with your own screenshot after deployment)*
+## Features
 
-## ✨ Features
+- **Unlimited Gameplay**: Support for continuous play without daily restrictions.
+- **Offline Capability**: PWA manifest and Service Worker support for installation on mobile and desktop.
+- **Data Persistence**: LocalStorage implementation for tracking win percentages, streaks, and guess distribution.
+- **Responsive Design**: Mobile-first architecture with optimized touch targets and adaptive layouts.
+- **Accessibility**: High Contrast mode and full keyboard navigation support.
+- **Theming**: System-aware Dark and Light modes.
 
-- **Unlimited Gameplay**: No daily limits. Click "New Word" to play forever.
-- **Authentic Rules**: Uses the original Wordle dictionary (2,300+ solutions, 12,000+ allowed guesses).
-- **Persistent Stats**: Tracks your Win %, Streak, and Guess Distribution (saved locally).
-- **Smooth Animations**: Satisfying tile flips, shake effects, and winning confetti.
-- **PWA Ready**: Installable on mobile/desktop for offline play.
-- **Themes**: System-aware Light/Dark mode and High Contrast support.
+## Technical Stack
 
-## 🛠️ Tech Stack
+- **Backend**: Python 3.12+ (Flask)
+- **Frontend**: Vanilla JavaScript (ES6+), HTML5
+- **Styling**: Tailwind CSS (Utility-first), CSS3 Animations
+- **Server**: Gunicorn (Production WSGI)
 
-- **Backend**: Python (Flask) - serve statics & HTML.
-- **Frontend**: Vanilla JavaScript (ES6+), optimized for performance.
-- **Styling**: Tailwind CSS (via CDN) + Custom CSS3 Animations.
-- **Data**: Embedded authentic word lists (no external API calls required).
+## Installation and Setup
 
-## 🚀 How to Run Locally
+### Prerequisites
 
-1.  **Clone the repository** (or download files):
+- Python 3.x installed
+- Git (optional)
+
+### Local Development
+
+1.  Clone the repository:
     ```bash
-    git clone https://github.com/YOUR_USER/Unlimited-Wordle.git
+    git clone https://github.com/YOUR_USERNAME/Unlimited-Wordle.git
     cd Unlimited-Wordle
     ```
 
-2.  **Install Dependencies**:
+2.  Install required Python packages:
     ```bash
     pip install -r requirements.txt
     ```
 
-3.  **Run the App**:
+3.  Start the development server:
     ```bash
     python app.py
     ```
 
-4.  **Play**:
-    Open your browser to `http://localhost:5000` (or `http://YOUR_IP:5000` on mobile).
+4.  Access the application at `http://localhost:5000`.
 
-## ☁️ Deployment
+## Deployment
 
-This app is ready for deployment on **Render**, **Heroku**, or **PythonAnywhere**.
+The application is configured for deployment on Vercel (Serverless) or Render (Container/WSGI).
 
-**Render (Recommended):**
-1.  Push code to GitHub.
-2.  Create a "Web Service" on [Render](https://render.com).
-3.  Connect your repo.
-4.  Render will auto-detect the `procfile` (Command: `gunicorn app:app`).
+### Vercel Deployment
 
-## 📜 Credits
+1.  Push the repository to GitHub.
+2.  Import the project into Vercel.
+3.  The included `vercel.json` will automatically configure the Python runtime.
 
-- Inspired by the original Wordle by Josh Wardle.
-- Word lists sourced from the original game archives.
-- Built with ❤️ by [Your Name].
+## License
 
-*Not affiliated with The New York Times.*
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Disclaimer
+
+This project is inspired by the original Wordle game created by Josh Wardle and currently owned by The New York Times Company. It is an independent implementation created for educational purposes.
