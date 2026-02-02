@@ -29,7 +29,7 @@ A production-ready, unlimited version of the Wordle word guessing game. This app
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/YOUR_USERNAME/Unlimited-Wordle.git
+    git clone https://github.com/uzairlol/Unlimited-Wordle.git
     cd Unlimited-Wordle
     ```
 
@@ -62,3 +62,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Disclaimer
 
 This project is inspired by the original Wordle game created by Josh Wardle and currently owned by The New York Times Company. It is an independent implementation created for educational purposes.
+
