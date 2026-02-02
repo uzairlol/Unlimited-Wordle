@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Unlimited Wordle</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'wordle-correct': '#6aaa64', // Green
+                        'wordle-present': '#c9b458', // Yellow
+                        'wordle-absent': '#787c7e',  // Gray
+                        'wordle-dark-correct': '#538d4e',
+                        'wordle-dark-present': '#b59f3b',
+                        'wordle-dark-absent': '#3a3a3c',
+                    },
+                    animation: {
+                        'pop': 'pop 0.1s ease-in-out',
+                        'flip-in': 'flip-in 0.25s ease-in',
+                        'flip-out': 'flip-out 0.25s ease-in',
+                        'shake': 'shake 0.5s ease-in-out',
+                    },
+                    keyframes: {
+                        pop: {
+                            '0%': { transform: 'scale(0.8)', opacity: '0' },
+                            '40%': { transform: 'scale(1.1)', opacity: '1' },
+                            '100%': { transform: 'scale(1)' },
+                        },
+                        shake: {
+                            '0%, 100%': { transform: 'translateX(0)' },
+                            '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
+                            '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body class="bg-white dark:bg-[#121213] text-black dark:text-white h-full flex flex-col transition-colors duration-200">
+
+    <!-- Placeholder for App -->
+    <div id="app" class="flex-grow flex flex-col h-full max-w-lg mx-auto w-full px-2">
+        <!-- Header -->
+        <header class="flex justify-between items-center py-3 border-b border-gray-200 dark:border-[#3a3a3c] mb-2">
+            <button class="p-1" aria-label="Menu">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <h1 class="text-3xl font-extrabold tracking-tighter cursor-pointer">Wordle <span
+                    class="text-xs font-normal align-top tracking-normal ml-1 italic opacity-60">Unlimited</span></h1>
+            <div class="flex gap-2">
+                <button class="p-1" aria-label="Stats">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                </button>
+                <button class="p-1" aria-label="Settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Game Board -->
+        <div id="board-container" class="flex-grow flex justify-center items-center py-2 overflow-hidden">
+            <div id="board" class="grid grid-rows-6 gap-[5px] w-full max-w-[350px] aspect-[5/6]">
+                <!-- Rows generated by JS -->
+            </div>
+        </div>
+
+        <!-- Keyboard -->
+        <div id="keyboard-container" class="pb-safe w-full max-w-[500px] mx-auto select-none">
+            <div id="keyboard" class="flex flex-col gap-2 p-2">
+                <!-- Keys generated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals Overlay -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/50 z-50 hidden flex justify-center items-center">
+        <!-- Content injected by JS -->
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/data.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+</body>
+
+</html>

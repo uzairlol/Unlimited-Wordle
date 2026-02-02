@@ -1,0 +1,66 @@
+/* Custom Styles */
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Tile Animations */
+/* We use a keyframe animation to rotate to 90deg and back, 
+   simulating a flip without needing 3D faces, so text stays upright. */
+
+@keyframes flip {
+    0% {
+        transform: rotateX(0);
+        border-color: theme('colors.gray.300');
+    }
+
+    45% {
+        transform: rotateX(90deg);
+        border-color: theme('colors.gray.300');
+    }
+
+    55% {
+        transform: rotateX(90deg);
+    }
+
+    100% {
+        transform: rotateX(0);
+    }
+}
+
+/* Dark mode border adjustment in keyframes is hard, so we handle colors in JS, just motion here */
+@keyframes flip-motion {
+    0% {
+        transform: rotateX(0);
+    }
+
+    50% {
+        transform: rotateX(90deg);
+    }
+
+    100% {
+        transform: rotateX(0);
+    }
+}
+
+.animate-flip {
+    animation: flip-motion 0.6s ease-in-out forwards;
+}
+
+/* High Contrast Mode Overrides */
+.high-contrast .bg-wordle-correct {
+    background-color: #f5793a !important;
+    /* Orange */
+}
+
+.high-contrast .bg-wordle-present {
+    background-color: #85c0f9 !important;
+    /* Blue */
+}
+
+.high-contrast .text-wordle-correct {
+    color: #ffffff !important;
+}
+
+.high-contrast .text-wordle-present {
+    color: #ffffff !important;
+}
