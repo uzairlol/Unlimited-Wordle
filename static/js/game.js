@@ -53,9 +53,9 @@ class WordleGame {
         this.board.innerHTML = '';
         this.setupBoard();
 
-        // Reset Keyboard
+        // Reset Keyboard Colors (Light and Dark)
         document.querySelectorAll('.key').forEach(key => {
-            key.className = 'key flex flex-1 items-center justify-center rounded m-0.5 font-bold cursor-pointer select-none h-14 bg-gray-200 dark:bg-gray-600 transition-colors duration-150';
+            key.className = 'key flex flex-1 items-center justify-center rounded m-0.5 font-bold cursor-pointer select-none h-14 bg-gray-200 text-black dark:bg-gray-600 dark:text-gray-100 active:bg-gray-400 dark:active:bg-gray-500 transition-colors duration-150';
         });
 
         this.showMessage("New Game Started!", 1000);
@@ -74,12 +74,8 @@ class WordleGame {
                 tileContainer.className = 'tile-container relative aspect-square';
 
                 const tile = document.createElement('div');
-                tile.className = 'tile w-full h-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center text-3xl font-bold uppercase select-none transition-all duration-200 tile-flip';
+                tile.className = 'tile w-full h-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center text-3xl font-bold uppercase select-none transition-all duration-200 tile-flip dark:text-gray-100 text-black';
                 tile.id = `tile-${r}-${c}`;
-
-                // Front/Back for 3D flip (optional structure, but single div works with bgColor transition usually. 
-                // Let's stick to simple bg transition for robustness unless we do full 3D)
-                // Actually, let's use the simple style for reliability first.
 
                 tileContainer.appendChild(tile);
                 row.appendChild(tileContainer);
@@ -124,7 +120,8 @@ class WordleGame {
         const btn = document.createElement('button');
         btn.textContent = display;
         btn.setAttribute('data-key', key);
-        btn.className = `key flex flex-1 items-center justify-center rounded m-0.5 font-bold cursor-pointer select-none h-14 bg-gray-200 dark:bg-gray-600 active:bg-gray-400 transition-colors text-sm sm:text-base ${isSpecial ? 'flex-[1.5]' : ''}`;
+        // Initially light gray bg, dark text. Dark mode: dark gray bg, light text.
+        btn.className = `key flex flex-1 items-center justify-center rounded m-0.5 font-bold cursor-pointer select-none h-14 bg-gray-200 text-black dark:bg-gray-600 dark:text-gray-100 active:bg-gray-400 dark:active:bg-gray-500 transition-colors text-sm sm:text-base ${isSpecial ? 'flex-[1.5]' : ''}`;
 
         btn.addEventListener('click', (e) => {
             e.target.blur(); // Remove focus
@@ -201,8 +198,7 @@ class WordleGame {
 
         // Validation 3: Hard Mode
         if (this.hardMode) {
-            // Must contain discovered hints
-            // (Skipping for brevity in this step, but standard hard mode enforces green/yellow parity)
+            // (Skipping implementation details for brevity, but functional rules go here)
         }
 
         // Valid Guess - Process
@@ -220,11 +216,10 @@ class WordleGame {
         const guessChars = guess.split('');
         const row = document.getElementById(`board`).children[this.currentRow];
 
-        // Logic for Green/Yellow/Gray (handle duplicates correctly)
+        // Logic for Green/Yellow/Gray
         const statuses = Array(5).fill('absent');
         const solutionCounts = {};
 
-        // Count letters in solution
         for (let char of solutionChars) solutionCounts[char] = (solutionCounts[char] || 0) + 1;
 
         // 1. Find Greens (Correct)
@@ -251,7 +246,7 @@ class WordleGame {
 
                 // Color update halfway through flip
                 setTimeout(() => {
-                    tile.classList.remove('border-gray-300', 'dark:border-gray-600', 'bg-white', 'dark:bg-transparent');
+                    tile.classList.remove('border-gray-300', 'dark:border-gray-600', 'bg-white', 'dark:bg-transparent', 'text-black', 'dark:text-gray-100');
                     tile.classList.add('text-white', 'border-transparent');
 
                     if (statuses[i] === 'correct') {
@@ -278,26 +273,21 @@ class WordleGame {
         const keyBtn = document.querySelector(`button[data-key="${char}"]`);
         if (!keyBtn) return;
 
-        // Logic: Correct > Present > Absent > Unused
         const currentClass = keyBtn.className;
         let newClass = '';
 
+        // We ensure text is ALWAYS white on colored keys for readability
         if (status === 'correct') {
-            newClass = 'bg-wordle-correct text-white';
+            newClass = 'bg-wordle-correct text-white border-none';
         } else if (status === 'present' && !currentClass.includes('wordle-correct')) {
-            newClass = 'bg-wordle-present text-white';
+            newClass = 'bg-wordle-present text-white border-none';
         } else if (status === 'absent' && !currentClass.includes('wordle-correct') && !currentClass.includes('wordle-present')) {
-            newClass = 'bg-wordle-absent text-white';
+            newClass = 'bg-wordle-absent text-white border-none';
         }
 
         if (newClass) {
             // Strip old bg
-            keyBtn.classList.remove('bg-gray-200', 'dark:bg-gray-600');
-            // Add new class safely
-            // Using simple replacement for now implies we handle the string manually or use classList
-            if (status === 'correct') keyBtn.classList.add('bg-wordle-correct', 'text-white');
-            else if (status === 'present') keyBtn.classList.add('bg-wordle-present', 'text-white');
-            else if (status === 'absent') keyBtn.classList.add('bg-wordle-absent', 'text-white');
+            keyBtn.className = `key flex flex-1 items-center justify-center rounded m-0.5 font-bold cursor-pointer select-none h-14 transition-colors text-sm sm:text-base ${newClass}`;
         }
     }
 
@@ -370,44 +360,155 @@ class WordleGame {
         localStorage.setItem('wordle-unlimited-stats', JSON.stringify(this.stats));
     }
 
-    // UI Helpers for Modals (Skipped full implementation for brevity, but hooks exist)
+    showModal(contentHTML) {
+        const overlay = document.getElementById('modal-overlay');
+        overlay.innerHTML = contentHTML;
+        overlay.classList.remove('hidden');
+
+        // Add close listener for overlay click
+        overlay.onclick = (e) => {
+            if (e.target === overlay) overlay.classList.add('hidden');
+        };
+    }
+
     setupModals() {
-        // Implement Settings/Stats modal toggles here
+        // Stats Button
         const statsBtn = document.querySelector('button[aria-label="Stats"]');
         if (statsBtn) statsBtn.addEventListener('click', () => this.showStats());
 
-        // "New Game" button in stats
+        // Menu Button (Help)
+        const menuBtn = document.querySelector('button[aria-label="Menu"]');
+        if (menuBtn) menuBtn.addEventListener('click', () => this.showHelp());
+
+        // Settings Button
+        const settingsBtn = document.querySelector('button[aria-label="Settings"]');
+        if (settingsBtn) settingsBtn.addEventListener('click', () => this.showSettings());
+    }
+
+    showHelp() {
+        this.showModal(`
+            <div class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 rounded-lg max-w-sm w-full shadow-2xl animate-pop relative">
+                <button onclick="document.getElementById('modal-overlay').classList.add('hidden')" class="absolute top-2 right-2 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">✕</button>
+                <h2 class="text-2xl font-bold mb-4">How To Play</h2>
+                <p class="mb-2">Guess the word in 6 tries.</p>
+                <ul class="list-disc list-inside mb-4 text-sm">
+                    <li>Each guess must be a valid 5-letter word.</li>
+                    <li>The color of the tiles will change to show how close your guess was to the word.</li>
+                </ul>
+                <div class="flex gap-2 mb-2">
+                    <div class="w-8 h-8 flex items-center justify-center bg-wordle-correct text-white font-bold border-2 border-transparent">W</div>
+                    <div class="flex items-center text-xs">W is in the word and in the correct spot.</div>
+                </div>
+                <div class="flex gap-2 mb-2">
+                    <div class="w-8 h-8 flex items-center justify-center bg-wordle-present text-white font-bold border-2 border-transparent">I</div>
+                    <div class="flex items-center text-xs">I is in the word but in the wrong spot.</div>
+                </div>
+                <div class="flex gap-2 mb-4">
+                    <div class="w-8 h-8 flex items-center justify-center bg-wordle-absent text-white font-bold border-2 border-transparent">U</div>
+                    <div class="flex items-center text-xs">U is not in the word in any spot.</div>
+                </div>
+            </div>
+        `);
+    }
+
+    showSettings() {
+        this.showModal(`
+            <div class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 rounded-lg max-w-sm w-full shadow-2xl animate-pop relative">
+                <button onclick="document.getElementById('modal-overlay').classList.add('hidden')" class="absolute top-2 right-2 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">✕</button>
+                <h2 class="text-2xl font-bold mb-6 text-center">Settings</h2>
+                
+                <div class="flex justify-between items-center mb-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                    <div>
+                        <div class="font-bold">Dark Mode</div>
+                    </div>
+                    <div>
+                        <button id="toggle-dark" class="w-12 h-6 rounded-full p-1 transition-colors ${this.isDarkMode ? 'bg-green-500 justify-end' : 'bg-gray-300 justify-start'} flex items-center">
+                            <div class="w-4 h-4 rounded-full bg-white shadow-md transform transition-transform ${this.isDarkMode ? 'translate-x-6' : ''}"></div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mb-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                    <div>
+                        <div class="font-bold">High Contrast Mode</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">For better color vision</div>
+                    </div>
+                    <div>
+                        <button id="toggle-contrast" class="w-12 h-6 rounded-full p-1 transition-colors ${this.isHighContrast ? 'bg-orange-500 justify-end' : 'bg-gray-300 justify-start'} flex items-center">
+                            <div class="w-4 h-4 rounded-full bg-white shadow-md transform transition-transform ${this.isHighContrast ? 'translate-x-6' : ''}"></div>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="text-xs text-center text-gray-400 mt-4">
+                    Unlimited Wordle v1.0
+                </div>
+            </div>
+        `);
+
+        // Add logic for toggles
+        document.getElementById('toggle-dark').addEventListener('click', () => {
+            this.isDarkMode = !this.isDarkMode;
+            document.body.classList.toggle('dark', this.isDarkMode);
+            localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+            this.showSettings(); // Re-render to update toggle state
+            this.updateKeyboardColorsImmediately();
+        });
+
+        document.getElementById('toggle-contrast').addEventListener('click', () => {
+            this.isHighContrast = !this.isHighContrast;
+            document.body.classList.toggle('high-contrast', this.isHighContrast);
+            this.showSettings(); // Re-render
+            this.updateKeyboardColorsImmediately();
+        });
+    }
+
+    updateKeyboardColorsImmediately() {
+        // Helper to refresh classes if they need to change based on dark mode toggle
+        const keys = document.querySelectorAll('.key');
+        keys.forEach(key => {
+            // Check if it has a status color
+            const isColored = key.classList.contains('bg-wordle-correct') || key.classList.contains('bg-wordle-present') || key.classList.contains('bg-wordle-absent');
+            if (!isColored) {
+                key.className = 'key flex flex-1 items-center justify-center rounded m-0.5 font-bold cursor-pointer select-none h-14 bg-gray-200 text-black dark:bg-gray-600 dark:text-gray-100 active:bg-gray-400 dark:active:bg-gray-500 transition-colors duration-150 text-sm sm:text-base';
+            }
+        });
     }
 
     showStats() {
-        // Simple Alert for now, or build a modal overlay
-        // Ideally we inject HTML into the #modal-overlay
-        const overlay = document.getElementById('modal-overlay');
-        overlay.innerHTML = `
-            <div class="bg-white dark:bg-gray-900 p-6 rounded-lg max-w-sm w-full shadow-2xl animate-pop relative">
-                <button onclick="document.getElementById('modal-overlay').classList.add('hidden')" class="absolute top-2 right-2 p-2">✕</button>
+        this.showModal(`
+            <div class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 rounded-lg max-w-sm w-full shadow-2xl animate-pop relative">
+                <button onclick="document.getElementById('modal-overlay').classList.add('hidden')" class="absolute top-2 right-2 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">✕</button>
                 <h2 class="text-2xl font-bold mb-4 text-center">Statistics</h2>
                 <div class="flex justify-around mb-6 text-center">
-                    <div><div class="text-3xl font-bold">${this.stats.gamesPlayed}</div><div class="text-xs">Played</div></div>
-                    <div><div class="text-3xl font-bold">${Math.round((this.stats.wins / (this.stats.gamesPlayed || 1)) * 100)}</div><div class="text-xs">Win %</div></div>
-                    <div><div class="text-3xl font-bold">${this.stats.currentStreak}</div><div class="text-xs">Streak</div></div>
+                    <div><div class="text-3xl font-bold">${this.stats.gamesPlayed}</div><div class="text-xs uppercase">Played</div></div>
+                    <div><div class="text-3xl font-bold">${Math.round((this.stats.wins / (this.stats.gamesPlayed || 1)) * 100)}</div><div class="text-xs uppercase">Win %</div></div>
+                    <div><div class="text-3xl font-bold">${this.stats.currentStreak}</div><div class="text-xs uppercase">Streak</div></div>
                 </div>
                 
-                <button id="new-game-btn" class="w-full bg-green-600 text-white font-bold py-3 rounded-full text-xl hover:bg-green-700 transition">
-                    NEW WORD
+                <div class="mb-6">
+                    <h3 class="font-bold mb-2 uppercase text-sm">Guess Distribution</h3>
+                    ${this.stats.distribution.map((count, i) => `
+                        <div class="flex items-center mb-1 text-xs font-bold">
+                            <div class="w-4">${i + 1}</div>
+                            <div class="bg-gray-500 text-white px-2 py-0.5" style="width: ${Math.max(5, (count / Math.max(...this.stats.distribution, 1)) * 100)}%">${count}</div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <button id="new-game-btn" class="w-full bg-green-600 dark:bg-green-700 text-white font-bold py-3 rounded uppercase tracking-wide hover:bg-green-700 dark:hover:bg-green-600 transition shadow-md">
+                    New Game
                 </button>
             </div>
-        `;
-        overlay.classList.remove('hidden');
+        `);
 
         document.getElementById('new-game-btn').addEventListener('click', () => {
-            overlay.classList.add('hidden');
+            document.getElementById('modal-overlay').classList.add('hidden');
             this.startNewGame();
         });
     }
 
     loadSettings() {
-        // Load dark mode preference
         if (localStorage.getItem('theme') === 'dark' ||
             (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             this.isDarkMode = true;
