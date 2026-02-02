@@ -34,7 +34,7 @@ class WordleGame {
         document.addEventListener('keydown', (e) => this.handleKeydown(e));
 
         // Set Theme
-        if (this.isDarkMode) document.body.classList.add('dark');
+        if (this.isDarkMode) document.documentElement.classList.add('dark');
         if (this.isHighContrast) document.body.classList.add('high-contrast');
     }
 
@@ -446,10 +446,10 @@ class WordleGame {
             </div>
         `);
 
-        // Add logic for toggles
         document.getElementById('toggle-dark').addEventListener('click', () => {
             this.isDarkMode = !this.isDarkMode;
-            document.body.classList.toggle('dark', this.isDarkMode);
+            // Tailwind requires 'dark' class on the HTML element, not body
+            document.documentElement.classList.toggle('dark', this.isDarkMode);
             localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
             this.showSettings(); // Re-render to update toggle state
             this.updateKeyboardColorsImmediately();
