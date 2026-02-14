@@ -20,6 +20,9 @@ class WordleGame {
         this.board = document.getElementById('board');
         this.keyboard = document.getElementById('keyboard');
 
+        // Solver / Inference
+        this.solver = new WordleSolver(ANSWERS, ALLOWED_GUESSES);
+
         this.init();
     }
 
@@ -57,6 +60,15 @@ class WordleGame {
         document.querySelectorAll('.key').forEach(key => {
             key.className = 'key flex flex-1 items-center justify-center rounded m-0.5 font-bold cursor-pointer select-none h-14 bg-gray-200 text-black dark:bg-gray-600 dark:text-gray-100 active:bg-gray-400 dark:active:bg-gray-500 transition-colors duration-150';
         });
+
+        // Reset Solver & UI
+        this.solver.reset();
+        this.updateStatsUI({
+            candidatesCount: ANSWERS.length,
+            reduction: 0,
+            bitsGained: 0
+        }, null);
+        document.getElementById('stats-bar').classList.remove('hidden');
 
         this.showMessage("New Game Started!", 1000);
     }
@@ -263,6 +275,15 @@ class WordleGame {
             }, i * 300); // Staggered delay
         });
 
+        // Solver Update
+        // Calculate Risk BEFORE updating candidates (using current knowledge)
+        const riskAnalysis = this.solver.calculateRisk(guess);
+
+        // Update knowledge with new feedback
+        const solverStats = this.solver.update(guess, statuses);
+        this.updateStatsUI(solverStats, riskAnalysis);
+
+
         // Wait for all animations
         setTimeout(() => {
             this.checkWinLoss(guess);
@@ -297,16 +318,120 @@ class WordleGame {
             this.showMessage(this.getPraise(), 2000);
             this.triggerConfetti();
             this.updateStats(true);
-            setTimeout(() => this.showStats(), 2500);
+            this.showEndGameComparison(true);
         } else if (this.currentRow === 5) {
             this.gameStatus = 'LOST';
             this.showMessage(this.solution.toUpperCase(), -1); // Persist
             this.updateStats(false);
-            setTimeout(() => this.showStats(), 2500);
+            this.showEndGameComparison(false);
         } else {
             this.currentRow++;
             this.currentTile = 0;
         }
+    }
+
+    updateStatsUI(stats, risk) {
+        // Words Left
+        const wordsLeftEl = document.getElementById('words-left');
+        wordsLeftEl.textContent = stats.candidatesCount;
+
+        // Reduction
+        const reductionEl = document.getElementById('words-reduction');
+        if (stats.reduction > 0) {
+            reductionEl.textContent = `(-${Math.round(stats.reduction)}%)`;
+        } else {
+            reductionEl.textContent = '';
+        }
+
+        // Efficiency (Total bits gained / Guesses so far)
+        // Initial entropy ~ 11.17 bits (log2(2315))
+        // Current entropy = log2(candidatesCount)
+        // Efficiency score = (Initial - Current) / Guesses
+        const guessesUsed = this.solver.history.length;
+        const currentEntropy = stats.candidatesCount > 0 ? Math.log2(stats.candidatesCount) : 0;
+        const totalBitsGained = this.solver.initialEntropy - currentEntropy;
+
+        let efficiency = 0;
+        if (guessesUsed > 0) {
+            efficiency = (totalBitsGained / guessesUsed).toFixed(2);
+        }
+        document.getElementById('efficiency-score').textContent = efficiency;
+
+        // Risk
+        if (risk) {
+            const riskEl = document.getElementById('risk-meter');
+            riskEl.textContent = risk.riskLevel;
+            riskEl.className = 'font-bold'; // Reset
+
+            if (risk.riskLevel === 'Safe') riskEl.classList.add('risk-safe');
+            else if (risk.riskLevel === 'Normal') riskEl.classList.add('risk-normal');
+            else if (risk.riskLevel === 'Aggressive') riskEl.classList.add('risk-aggressive');
+            else if (risk.riskLevel === 'Optimal') riskEl.classList.add('risk-optimal');
+            else if (risk.riskLevel === 'To The Point') riskEl.classList.add('risk-optimal');
+        }
+    }
+
+    async showEndGameComparison(won) {
+        // Run Bot Simulation
+        // This might take a second, so we might want to show a spinner or just do it optimistically
+        // For 2300 words it should be fast enough < 1s.
+
+        // Wait a bit for animations to finish
+        await new Promise(r => setTimeout(r, 2000));
+
+        const botResult = this.solver.runBotSimulation(this.solution);
+        const humanGuesses = won ? this.currentRow + 1 : 'X';
+
+        const content = `
+            <div class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 rounded-lg max-w-sm w-full shadow-2xl animate-pop relative">
+                <button onclick="document.getElementById('modal-overlay').classList.add('hidden')" class="absolute top-2 right-2 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">✕</button>
+                <h2 class="text-2xl font-bold mb-4 text-center">${won ? 'Victory!' : 'Game Over'}</h2>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6 text-center">
+                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <div class="text-xs uppercase text-gray-500 dark:text-gray-400">You</div>
+                        <div class="text-3xl font-bold ${won ? 'text-green-600 dark:text-green-400' : 'text-red-600'}">${humanGuesses}</div>
+                        <div class="text-xs text-gray-400">guesses</div>
+                    </div>
+                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <div class="text-xs uppercase text-gray-500 dark:text-gray-400">Optimal Bot</div>
+                        <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">${botResult.guesses}</div>
+                        <div class="text-xs text-gray-400">expected</div>
+                    </div>
+                </div>
+
+                <div class="mb-6 text-sm">
+                    <h3 class="font-bold mb-2">Bot's Path:</h3>
+                    <div class="flex flex-wrap gap-1">
+                        ${botResult.history.map(step => `
+                            <span class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs">
+                                ${step.guess.toUpperCase()}
+                            </span>
+                        `).join(' → ')}
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button id="stats-btn" class="flex-1 bg-gray-500 text-white font-bold py-2 rounded uppercase text-sm hover:bg-gray-600 transition">
+                        Stats
+                    </button>
+                    <button id="new-game-btn-end" class="flex-1 bg-green-600 dark:bg-green-700 text-white font-bold py-2 rounded uppercase text-sm hover:bg-green-700 dark:hover:bg-green-600 transition">
+                        New Game
+                    </button>
+                </div>
+            </div>
+        `;
+
+        this.showModal(content);
+
+        document.getElementById('stats-btn').addEventListener('click', () => {
+            this.showStats();
+        });
+
+        document.getElementById('new-game-btn-end').addEventListener('click', () => {
+            document.getElementById('modal-overlay').classList.add('hidden');
+            this.startNewGame();
+        });
     }
 
     showMessage(msg, duration = 1000) {

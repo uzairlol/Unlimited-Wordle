@@ -110,3 +110,47 @@ button.key {
     touch-action: manipulation;
     /* Disable double-tap zoom */
 }
+
+/* Risk Meter Colors */
+.risk-safe,
+.risk-normal,
+.risk-aggressive,
+.risk-optimal {
+    transition: color 0.3s ease;
+}
+
+.risk-safe {
+    color: #16a34a;
+    /* Green */
+}
+
+.dark .risk-safe {
+    color: #4ade80;
+}
+
+.risk-normal {
+    color: #ca8a04;
+    /* Yellow-Orange */
+}
+
+.dark .risk-normal {
+    color: #facc15;
+}
+
+.risk-aggressive {
+    color: #dc2626;
+    /* Red */
+}
+
+.dark .risk-aggressive {
+    color: #f87171;
+}
+
+.risk-optimal {
+    color: #9333ea;
+    /* Purple */
+}
+
+.dark .risk-optimal {
+    color: #c084fc;
+}

@@ -89,6 +89,24 @@
             </div>
         </header>
 
+        <!-- Stats Bar -->
+        <div id="stats-bar"
+            class="flex justify-between items-center px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-md mb-2 text-xs sm:text-sm font-mono shadow-sm hidden">
+            <div class="text-center">
+                <div class="text-gray-500 dark:text-gray-400 uppercase tracking-wide text-[10px]">Words Left</div>
+                <div class="font-bold text-gray-900 dark:text-gray-100"><span id="words-left">-</span> <span
+                        id="words-reduction" class="text-green-600 text-[10px] ml-1"></span></div>
+            </div>
+            <div class="text-center">
+                <div class="text-gray-500 dark:text-gray-400 uppercase tracking-wide text-[10px]">Efficiency</div>
+                <div class="font-bold text-blue-600 dark:text-blue-400" id="efficiency-score">-</div>
+            </div>
+            <div class="text-center">
+                <div class="text-gray-500 dark:text-gray-400 uppercase tracking-wide text-[10px]">Risk</div>
+                <div class="font-bold" id="risk-meter">-</div>
+            </div>
+        </div>
+
         <!-- Game Board -->
         <div id="board-container"
             class="flex-grow flex justify-center items-center py-2 overflow-hidden w-full px-2 sm:px-0">
@@ -120,6 +138,7 @@
 
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/data.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/solver.js') }}"></script>
     <script src="{{ url_for('static', filename='js/game.js') }}"></script>
 </body>
 
